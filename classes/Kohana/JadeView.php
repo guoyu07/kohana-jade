@@ -6,6 +6,9 @@ class Kohana_JadeView extends View {
 	 * @var \Jade\Jade
 	 */
 	public static $jade = null;
+	
+	// for prettyprint tags in Jade
+	public static $prettyprint = false;
 
 	public function __toString()
 	{
@@ -21,7 +24,8 @@ class Kohana_JadeView extends View {
 	{
 		if (!(self::$jade instanceof \Jade\Jade))
 		{
-			self::$jade = new \Jade\Jade(true);
+			$cachePath = false;
+			self::$jade = new \Jade\Jade($cachePath,self::$prettyprint);
 		}
 
 		return self::$jade;
@@ -72,12 +76,12 @@ class Kohana_JadeView extends View {
 		{
 			$cacheTime = filemtime($path);
 		}
-
-		if ($cacheTime && filemtime($kohana_view_filename) < $cacheTime)
+		
+		if (Kohana::$environment !== Kohana::DEVELOPMENT && $cacheTime && filemtime($kohana_view_filename) < $cacheTime)
 		{
 			return $path;
 		}
-
+		if (!is_dir($folder)) mkdir($folder);
 		if (!is_writable($folder))
 		{
 			throw new Exception(sprintf('Cache directory "%s" must be writable.', $folder));
